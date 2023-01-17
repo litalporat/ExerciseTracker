@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -10,12 +11,23 @@ export default function CreateExercise() {
     duration: 0,
     date: new Date(),
   });
-  const [users, setUsers] = useState(["lital", "zvi", "silvia"]);
+  const [users, setUsers] = useState(() => {
+    axios.get("http://localhost:5000/users").then((res) => {
+      if (res.data.length > 0) {
+        const listUsers = [];
+        res.data.map((user) => listUsers.push(user.username));
+        setUsers(listUsers);
+      }
+    });
+  });
 
   const onSubmit = (e) => {
     e.preventDefault();
     console.log(exercise);
-    window.location = "/";
+    axios.post("http://localhost:5000/exercises/add", exercise).then((res) => {
+      console.log(res.data);
+      window.location = "/";
+    });
   };
   const onChange = (e) => {
     const newExer = { ...exercise };
@@ -41,13 +53,18 @@ export default function CreateExercise() {
             value={exercise.username}
             onChange={onChange}
           >
-            {users.map((user) => {
-              return (
-                <option key={user} value={user}>
-                  {user}
-                </option>
-              );
-            })}
+            <option hidden selected value>
+              {" "}
+              -- select an option --{" "}
+            </option>
+            {users &&
+              users.map((user) => {
+                return (
+                  <option key={user} value={user}>
+                    {user}
+                  </option>
+                );
+              })}
           </select>
         </div>
         <div className="form-group">
@@ -81,6 +98,7 @@ export default function CreateExercise() {
             />
           </div>
         </div>
+        <br />
         <div className="form-group">
           <input
             type={"submit"}

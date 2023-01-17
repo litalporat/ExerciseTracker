@@ -1,16 +1,22 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 export default function CreateUser() {
-  const [username, setUser] = useState("");
+  const [user, setUser] = useState({ username: "" });
 
   const onChange = (e) => {
-    setUser(e.currentTarget.value);
+    const newUser = { ...user };
+    newUser["username"] = e.currentTarget.value;
+    setUser(newUser);
   };
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log(username);
-    setUser("");
+    console.log(user.username);
+    axios
+      .post("http://localhost:5000/users/add", user)
+      .then((res) => console.log(res.data));
+    setUser({ username: "" });
   };
   return (
     <div>
@@ -22,10 +28,11 @@ export default function CreateUser() {
             type={"text"}
             required
             className="form-control"
-            value={username}
+            value={user.username}
             onChange={onChange}
           />
         </div>
+        <br />
         <div className="form-group">
           <input
             type={"submit"}
